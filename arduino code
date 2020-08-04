@@ -1,0 +1,39 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial gsm(3,2);
+
+int sensor = A0;
+int rled = 4;
+int gled = 5;
+int pizo = 6;
+int sensorvalue;
+void setup() {
+  gsm.begin(9600);
+  pinMode(rled,OUTPUT);
+  pinMode(gled,OUTPUT);
+  pinMode(pizo,OUTPUT);
+  gsm.write("AT");
+}
+
+void loop() {
+  sensorvalue = analogRead(A0);
+  int valuem = map(sensorvalue,480,860,0,100);
+  valuem = constrain(valuem,0,100);
+  if(valuem>5){
+    digitalWrite(rled,HIGH);
+    digitalWrite(gled,LOW);
+    tone(pizo,250);
+    gsm.write("AT+CMGF=1");
+    delay(100);
+    gsm.write("AT+CMGS=\"+ZZXXXXXXXXXX\"");//phone nomber
+    delay(100);
+    gsm.write("There is a gas leak");
+    delay(100);
+    gsm.write(0x1A);
+  }
+  else{
+    digitalWrite(gled,HIGH);
+    digitalWrite(rled,LOW);
+    noTone(pizo);
+  }
+}
